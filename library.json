@@ -1,25 +1,26 @@
 {
-    "name": "IS32FL3237",
-    "version": "0.1.0",
-    "description": "Arduino driver for Lumissil IS32FL3237 36-channel LED driver",
-    "keywords": "is32fl3237, led",
-    "repository":
+  "name": "IS32FL3237",
+  "version": "0.1.0",
+  "description": "Arduino driver for Lumissil IS32FL3237 36-channel LED driver",
+  "keywords": "is32fl3237, led",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/gordoste/is32fl3237_drv.git"
+  },
+  "authors":
+  [
     {
-      "type": "git",
-      "url": "https://github.com/gordoste/is32fl3237_drv.git"
-    },
-    "authors":
-    [
-      {
-        "name": "Stephen Gordon",
-        "email": "gordoste@iinet.net.au",
-        "maintainer": true
-      }
-    ],
-    "license": "Apache-2.0",
-    "homepage": "",
-    "dependencies": {
-    },
-    "frameworks": "arduino",
-    "platforms": "*"
-  }
+      "name": "Stephen Gordon",
+      "email": "gordoste@iinet.net.au",
+      "maintainer": true
+    }
+  ],
+  "license": "Apache-2.0",
+  "homepage": "",
+  "dependencies": {
+      "Wire": "*"
+  },
+  "frameworks": "arduino",
+  "platforms": "*"
+}
