@@ -183,7 +183,7 @@ public:
     void setShutdown(bool x);
     void enablePWM(bool x);
 
-    // setBrightness(n,v) - write 8-bit brightness value for LED #n
+    // setBrightness8(n,v) - write 8-bit brightness value for LED #n
     void setBrightness8(uint8_t n, uint8_t v);
     // setBrightness(n,v) - write 16-bit brightness value for LED #n
     void setBrightness(uint8_t n, uint16_t v);
