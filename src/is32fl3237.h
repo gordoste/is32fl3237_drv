@@ -149,6 +149,24 @@ typedef enum {
     AD_SDA  =   2
 } ad_conn_t;
 
+typedef enum {
+    PWM_8BIT,
+    PWM_10BIT,
+    PWM_12BIT,
+    PWM_16BIT
+} pwm_res_t;
+
+typedef enum {
+    OSC_16MHZ,
+    OSC_8MHZ,
+    OSC_1MHZ,
+    OSC_500KHZ,
+    OSC_250KHZ,
+    OSC_125KHZ,
+    OSC_62KHZ,
+    OSC_31KHZ
+} osc_freq_t;
+
 class IS32FL3237
 {
 private:
@@ -161,15 +179,22 @@ public:
     // VCC                      11
     // SCL                      01
     // SDA                      10
-    void begin(ad_conn_t ad);
+    void begin(ad_conn_t ad, pwm_res_t res, osc_freq_t of);
     void setShutdown(bool x);
+    void enablePWM(bool x);
 
-    // WritePWM8(n,v) - write 8-bit PWM value for LED #n
-    void writePWM8(uint8_t n, uint8_t v);
-    // WritePWM16(n,v) - write 16-bit PWM value for LED #n
-    void writePWM16(uint8_t n, uint16_t v);
-    // WriteScaleFactor(n) - write Scaling Factor for LED #n
-    void writeScaleFactor(uint8_t n, uint8_t v);
+    // setBrightness(n,v) - write 8-bit brightness value for LED #n
+    void setBrightness8(uint8_t n, uint8_t v);
+    // setBrightness(n,v) - write 16-bit brightness value for LED #n
+    void setBrightness(uint8_t n, uint16_t v);
+
+    // If using PWM, you need to call this to apply any updated brightness settings
+    void updateLEDs();
+
+    // getScaleFactor(n) - read Scaling Factor for LED #n
+    uint8_t getScaleFactor(uint8_t n);
+    // setScaleFactor(n,v) - write Scaling Factor for LED #n
+    void setScaleFactor(uint8_t n, uint8_t v);
 
     uint8_t readRegister(uint8_t addr);
     void writeRegister(uint8_t addr, uint8_t val);

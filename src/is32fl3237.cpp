@@ -1,27 +1,52 @@
 #include "is32fl3237.h"
 
-void IS32FL3237::begin(ad_conn_t ad)
+void IS32FL3237::begin(ad_conn_t ad, pwm_res_t res, osc_freq_t of)
 {
     Wire.begin();
     i2c_addr = 0b0110100 | (ad & 0b11);
+    uint8_t ctl = 0;
+    switch (res) {
+        case PWM_8BIT: break;
+        case PWM_10BIT: ctl |= 0x02; break;
+        case PWM_12BIT: ctl |= 0x04; break;
+        case PWM_16BIT: ctl |= 0x06; break;
+    }
+    switch (of) {
+        case OSC_16MHZ: break;
+        case OSC_8MHZ: ctl |= 0x10; break;
+        case OSC_1MHZ: ctl |= 0x20; break;
+        case OSC_500KHZ: ctl |= 0x30; break;
+        case OSC_250KHZ: ctl |= 0x40; break;
+        case OSC_125KHZ: ctl |= 0x50; break;
+        case OSC_62KHZ: ctl |= 0x60; break;
+        case OSC_31KHZ: ctl |= 0x70; break;
+    }
+    writeRegister(CONTROL, ctl);
 }
 
 void IS32FL3237::setShutdown(bool x) {
     uint8_t i = readRegister(CONTROL);
-    uint8_t j = i ^ (x?_CTL_SSD_MASK:0x00);
+    uint8_t j = x?(i&(~_CTL_SSD_MASK)):(i|_CTL_SSD_MASK);
     if (j != i) writeRegister(CONTROL, j);
 }
 
-void IS32FL3237::writePWM8(uint8_t n, uint8_t v)
-{
-    if (n<1 || n>36) return;
-    Wire.beginTransmission(i2c_addr);
-    Wire.write((n << 1) - 1);
-    Wire.write(v);
-    Wire.endTransmission();
+void IS32FL3237::enablePWM(bool x) {
+    uint8_t i = readRegister(SSR);
+    uint8_t j = x?(i&(~_SSR_DCPWM_MASK)):(i|_SSR_DCPWM_MASK);
+    if (j != i) writeRegister(SSR, j);
 }
 
-void IS32FL3237::writePWM16(uint8_t n, uint16_t v)
+void IS32FL3237::updateLEDs() {
+    writeRegister(UPDATE, 0);
+}
+
+void IS32FL3237::setBrightness8(uint8_t n, uint8_t v)
+{
+    if (n<1 || n>36) return;
+    writeRegister((n << 1) - 1, v);
+}
+
+void IS32FL3237::setBrightness(uint8_t n, uint16_t v)
 {
     if (n<1 || n>36) return;
     Wire.beginTransmission(i2c_addr);
@@ -31,13 +56,15 @@ void IS32FL3237::writePWM16(uint8_t n, uint16_t v)
     Wire.endTransmission();
 }
 
-void IS32FL3237::writeScaleFactor(uint8_t n, uint8_t v)
+uint8_t IS32FL3237::getScaleFactor(uint8_t n) {
+    if (n<1 || n>36) return 0;
+    return readRegister(0x49+n);
+}
+
+void IS32FL3237::setScaleFactor(uint8_t n, uint8_t v)
 {
     if (n<1 || n>36) return;
-    Wire.beginTransmission(i2c_addr);
-    Wire.write(0x49+n);
-    Wire.write(v);
-    Wire.endTransmission();
+    writeRegister(0x49+n, v);
 }
 
 void IS32FL3237::writeRegister(uint8_t addr, uint8_t val)
@@ -54,7 +81,7 @@ uint8_t IS32FL3237::readRegister(uint8_t addr)
     Wire.write(addr);
     Wire.endTransmission();
     unsigned long t = millis();
-    Wire.requestFrom(i2c_addr, 1);
+    Wire.requestFrom(i2c_addr, (uint8_t)1);
     while (millis() - t < 1000 && !Wire.available())
         ;
     if (!Wire.available())
