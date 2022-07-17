@@ -142,6 +142,12 @@
 #define _SSR_RNG_MASK   0x0C
 #define _SSR_CLT_MASK   0x03
 
+ // Sets the 7-bit I2C address depending where AD (pin 40) is connected. See datasheet
+ // AD connected to:         2 LS bits of I2C address
+ // GND                      00
+ // VCC                      11
+ // SCL                      01
+ // SDA                      10
 typedef enum {
     AD_GND  =   0,
     AD_VCC  =   3,
@@ -149,6 +155,7 @@ typedef enum {
     AD_SDA  =   2
 } ad_conn_t;
 
+// Sets the resolution of the PWM brightness control. See datasheet
 typedef enum {
     PWM_8BIT,
     PWM_10BIT,
@@ -156,6 +163,8 @@ typedef enum {
     PWM_16BIT
 } pwm_res_t;
 
+// Sets the frequency of the PWM signal. See datasheet for important info
+// about combinations of PWM resolution and osc. frequency
 typedef enum {
     OSC_16MHZ,
     OSC_8MHZ,
@@ -170,23 +179,26 @@ typedef enum {
 class IS32FL3237
 {
 private:
-    uint8_t i2c_addr;
+    uint8_t m_i2c_addr;
+    bool m_autoUpdate;
 
 public:
-    // Set the 7-bit I2C address depending where AD (pin 40) is connected. See datasheet
-    // AD connected to:         2 LS bits of I2C address
-    // GND                      00
-    // VCC                      11
-    // SCL                      01
-    // SDA                      10
-    void begin(ad_conn_t ad, pwm_res_t res, osc_freq_t of);
+    void begin(ad_conn_t ad, pwm_res_t res, osc_freq_t of, bool autoUpdate);
     void setShutdown(bool x);
     void enablePWM(bool x);
 
+    // getBrightness8(n) - read 8-bit brightness value for LED #n
+    uint8_t getBrightness8(uint8_t n);
+    // getBrightness(n) - read 16-bit brightness value for LED #n
+    uint16_t getBrightness(uint8_t n);
     // setBrightness8(n,v) - write 8-bit brightness value for LED #n
     void setBrightness8(uint8_t n, uint8_t v);
     // setBrightness(n,v) - write 16-bit brightness value for LED #n
     void setBrightness(uint8_t n, uint16_t v);
+    // setAllBrightness8(v) - write 8-bit brightness value for all LEDs
+    void setAllBrightness8(uint8_t v);
+    // setAllBrightness(v) - write 16-bit brightness value for all LEDs
+    void setAllBrightness(uint16_t v);
 
     // If using PWM, you need to call this to apply any updated brightness settings
     void updateLEDs();
@@ -195,6 +207,8 @@ public:
     uint8_t getScaleFactor(uint8_t n);
     // setScaleFactor(n,v) - write Scaling Factor for LED #n
     void setScaleFactor(uint8_t n, uint8_t v);
+    // setAllScaleFactors(v) - write Scaling Factor for all LEDs
+    void setAllScaleFactors(uint8_t v);
 
     uint8_t readRegister(uint8_t addr);
     void writeRegister(uint8_t addr, uint8_t val);
