@@ -116,6 +116,7 @@
 #define CONTROL 0x00
 #define UPDATE  0x49
 #define GCC     0x6E
+#define PHASE   0x70
 #define OSDE    0x71
 #define OSD1    0x72
 #define OSD2    0x73
