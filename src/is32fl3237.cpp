@@ -132,7 +132,7 @@ uint8_t IS32FL3237::readRegister(uint8_t addr)
         ;
     if (!Wire.available())
     {
-        Serial.println("i2c read timeout");
+        Serial.printf("[0x%02x] i2c read timeout\n", m_i2c_addr);
         return 0;
     }
     return Wire.read();
