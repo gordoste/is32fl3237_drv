@@ -179,11 +179,31 @@ typedef enum {
 
 class IS32FL3237 {
 private:
+  const char *const m_name;
   uint8_t m_i2c_addr;
-  bool m_autoUpdate;
+  bool m_autoUpdate;    // If true, brightness changes are applied immediately.
+  Print &m_log;         // Logger, defaults to Serial.
+  int m_verbosity = 0;  // Verbosity level
+
+  bool validate_led_number(uint8_t n);
+
+#ifdef NDEBUG  // Release mode. Zero overhead.
+  void log(int verbosity, const char *fmt, ...) {}
+  void error(const char *fmt, ...) {}
+#else
+  void vlog(const char *fmt, va_list args);
+  void log(int verbosity, const char *fmt, ...) __attribute__((format(printf, 3, 4)));
+  void error(const char *fmt, ...) __attribute__((format(printf, 2, 3)));
+#endif
 
 public:
+  IS32FL3237(Print &log_output = Serial, const char *name = "IS32FL3237")
+    : m_name(name), m_log(log_output) {
+    log(1, "constructed!");
+  }
+
   void begin(ad_conn_t ad, pwm_res_t res, osc_freq_t of, bool autoUpdate);
+
   void setShutdown(bool x);
   void enablePWM(bool x);
 
@@ -212,6 +232,10 @@ public:
 
   uint8_t readRegister(uint8_t addr);
   void writeRegister(uint8_t addr, uint8_t val);
+
+  void set_verbosity(int verbosity) {
+    m_verbosity = verbosity;
+  }
 };
 
-#endif //#ifndef _IS32FL3237_H
+#endif  //#ifndef _IS32FL3237_H
